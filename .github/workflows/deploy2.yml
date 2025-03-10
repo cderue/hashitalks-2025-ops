@@ -1,4 +1,4 @@
-name: Run Waypoint Action
+name: Create Waypoint Application
 
 on:
   workflow_dispatch:
@@ -10,8 +10,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Run Waypoint Action
-        id: run-waypoint-action
+      - name: Create Waypoint Application
+        id: create-waypoint-application
         env:
           HCP_CLIENT_ID: ${{ secrets.SP_CLIENT_ID }}
           HCP_CLIENT_SECRET: ${{ secrets.SP_CLIENT_SECRET }}
@@ -23,7 +23,7 @@ jobs:
           # Install dependencies
           pip install requests
 
-          # Create the Python script to run the Waypoint action
+          # Create the Python script to create the Waypoint application
           cat > run_waypoint_application.py << 'EOF'
           #!/usr/bin/env python3
           import os
@@ -69,8 +69,8 @@ jobs:
               "Content-Type": "application/json"
           }
           
-          # Run the Waypoint action
-          run_action_url = f"https://api.cloud.hashicorp.com/waypoint/2024-11-22/organizations/{organization_id}/projects/{project_id}/applications/from-template
+          # Create the Waypoint application
+          run_action_url = f"https://api.cloud.hashicorp.com/waypoint/2024-11-22/organizations/{organization_id}/projects/{project_id}/applications/from-template"
           
           action_payload = {
               "application_template": {
