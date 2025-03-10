@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     
 jobs:
-  run-waypoint-action:
+  create-waypoint-application:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -85,12 +85,12 @@ jobs:
                 {
                   "name": "github_repository_url",
                   "value": "${{ github.server_url }}/${{ github.repository }}",
-                  "variable_type: "string"
+                  "variable_type": "string"
                 },
                 {
                   "name": "github_repository_branch",
                   "value": "main",
-                  "variable_type: "string"
+                  "variable_type": "string"
                 }
               ]
           }
