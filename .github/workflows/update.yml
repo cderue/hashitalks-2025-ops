@@ -44,13 +44,6 @@ jobs:
           action_name = os.environ.get('ACTION_NAME')
           #action_params_str = os.environ.get('ACTION_PARAMS', '{}')
           
-          # Parse action parameters
-          try:
-              action_params = json.loads(action_params_str)
-          except json.JSONDecodeError:
-              print("Error: Invalid JSON format for action parameters")
-              exit(1)
-          
           # Get HCP auth token
           auth_url = "https://auth.idp.hashicorp.com/oauth2/token"
           auth_headers = {
