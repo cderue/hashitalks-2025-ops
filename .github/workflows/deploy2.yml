@@ -73,6 +73,7 @@ jobs:
           run_action_url = f"https://api.cloud.hashicorp.com/waypoint/2024-11-22/organizations/{organization_id}/projects/{project_id}/applications/from-template"
           
           action_payload = {
+              "name": f"{app_name}",
               "application_template": {
                   "name": f"{template_name}"
               },
