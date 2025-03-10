@@ -84,12 +84,12 @@ jobs:
                   "variable_type": "string"
                 },
                 {
-                  "name": "github_repository_url",
+                  "name": "repository_url",
                   "value": "${{ github.server_url }}/${{ github.repository }}",
                   "variable_type": "string"
                 },
                 {
-                  "name": "github_repository_branch",
+                  "name": "repository_branch",
                   "value": "main",
                   "variable_type": "string"
                 }
