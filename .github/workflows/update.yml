@@ -17,8 +17,8 @@ jobs:
           HCP_CLIENT_SECRET: ${{ secrets.SP_CLIENT_SECRET }}
           ORGANIZATION_ID: ${{ secrets.HCP_ORGANIZATION_ID }}
           PROJECT_ID: ${{ secrets.HCP_WAYPOINT_PROJECT_ID }}
-          APP_NAME: ${{ env.HCP_WAYPOINT_APP_NAME }}
-          ACTION_NAME: ${{ env.HCP_WAYPOINT_ACTION_NAME }}
+          APP_NAME: human-talks-demo
+          ACTION_NAME: Merge Branch
         run: |
           # Install dependencies
           pip install requests
