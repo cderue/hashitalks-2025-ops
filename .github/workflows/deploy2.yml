@@ -18,7 +18,7 @@ jobs:
           ORGANIZATION_ID: ${{ secrets.HCP_ORGANIZATION_ID }}
           PROJECT_ID: ${{ secrets.HCP_WAYPOINT_PROJECT_ID }}
           APP_NAME: human-talks-demo
-          ACTION_NAME: Merge Branch
+          TEMPLATE_NAME: human-talks-demo
         run: |
           # Install dependencies
           pip install requests
@@ -41,7 +41,7 @@ jobs:
           organization_id = os.environ.get('ORGANIZATION_ID')
           project_id = os.environ.get('PROJECT_ID')
           app_name = os.environ.get('APP_NAME')
-          action_name = os.environ.get('ACTION_NAME')
+          template_name = os.environ.get('TEMPLATE_NAME')
           #action_params_str = os.environ.get('ACTION_PARAMS', '{}')
           
           # Get HCP auth token
@@ -70,12 +70,29 @@ jobs:
           }
           
           # Run the Waypoint action
-          run_action_url = f"https://api.cloud.hashicorp.com/waypoint/2024-11-22/organizations/{organization_id}/projects/{project_id}/action"
+          run_action_url = f"https://api.cloud.hashicorp.com/waypoint/2024-11-22/organizations/{organization_id}/projects/{project_id}/applications/from-template
           
           action_payload = {
-              "action_ref": {
-                  "name": f"{action_name}"
-              }
+              "application_template": {
+                  "name": f"{template_name}"
+              },
+              "variables": [
+                {
+                  "name": "app",
+                  "value": f"{app_name}",
+                  "variable_type": "string"
+                },
+                {
+                  "name": "repository_url",
+                  "value": "",
+                  "variable_type: "string"
+                },
+                {
+                  "name": "repository_branch",
+                  "value": "main",
+                  "variable_type: "string"
+                }
+              ]
           }
           
           print(f"Running Waypoint action '{action_name}' for app '{app_name}'")
