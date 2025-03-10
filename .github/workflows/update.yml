@@ -1,26 +1,133 @@
-name: Update with Waypoint
+name: Run Waypoint Action
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
+    inputs:
+      project_id:
+        description: 'HCP Waypoint Project ID'
+        required: true
+        default: ''
+      app_name:
+        description: 'Application Name'
+        required: true
+        default: ''
+      workspace_name:
+        description: 'Workspace Name'
+        required: true
+        default: 'default'
+      action_name:
+        description: 'Action Name to Run'
+        required: true
+        default: ''
+      action_params:
+        description: 'Action Parameters (JSON)'
+        required: false
+        default: '{}'
 
 jobs:
-  deploy:
+  run-waypoint-action:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up HCP CLI
+      - name: Run Waypoint Action
+        id: run-waypoint-action
+        env:
+          HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
+          HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
+          PROJECT_ID: ${{ github.event.inputs.project_id || secrets.HCP_WAYPOINT_PROJECT_ID }}
+          APP_NAME: ${{ github.event.inputs.app_name }}
+          WORKSPACE_NAME: ${{ github.event.inputs.workspace_name }}
+          ACTION_NAME: ${{ github.event.inputs.action_name }}
+          ACTION_PARAMS: ${{ github.event.inputs.action_params }}
         run: |
-          sudo apt-get update
-          sudo apt-get install wget gpg coreutils
-          wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-          sudo apt-get update
-          sudo apt-get install hcp
+          # Install dependencies
+          pip install requests
 
-      - name: Authenticate with HCP
-        run: hcp auth login --client-id="${{ secrets.SP_CLIENT_ID }}" --client-secret="${{ secrets.SP_CLIENT_SECRET }}"
-
-      - name: Deploy with Waypoint
-        run: hcp waypoint applications update --name="human-talks-demo" --action-config-name="Merge Branch" --project="3e947867-82a7-4183-9280-de2051c8596b"
+          # Create the Python script to run the Waypoint action
+          cat > run_waypoint_action.py << 'EOF'
+          #!/usr/bin/env python3
+          import os
+          import json
+          import time
+          import requests
+          
+          # set log level to debug
+          import logging
+          logging.basicConfig(level=logging.DEBUG)
+          
+          # Get environment variables
+          hcp_client_id = os.environ.get('HCP_CLIENT_ID')
+          hcp_client_secret = os.environ.get('HCP_CLIENT_SECRET')
+          organization_id = os.environ.get('ORGANIZATION_ID')
+          project_id = os.environ.get('PROJECT_ID')
+          app_name = os.environ.get('APP_NAME')
+          action_name = os.environ.get('ACTION_NAME')
+          action_params_str = os.environ.get('ACTION_PARAMS', '{}')
+          
+          # Parse action parameters
+          try:
+              action_params = json.loads(action_params_str)
+          except json.JSONDecodeError:
+              print("Error: Invalid JSON format for action parameters")
+              exit(1)
+          
+          # Get HCP auth token
+          auth_url = "https://auth.idp.hashicorp.com/oauth2/token"
+          auth_headers = {
+              "Content-Type": "application/x-www-form-urlencoded"
+          }
+          auth_data = {
+              "client_id": hcp_client_id,
+              "client_secret": hcp_client_secret,
+              "grant_type": "client_credentials",
+              "audience": "https://api.hashicorp.cloud"
+          }
+          
+          auth_response = requests.post(auth_url, headers=auth_headers, data=auth_data)
+          if auth_response.status_code != 200:
+              print(f"Error authenticating with HCP: {auth_response.text}")
+              exit(1)
+          
+          access_token = auth_response.json().get('access_token')
+          
+          # Prepare headers for API requests
+          headers = {
+              "Authorization": f"Bearer {access_token}",
+              "Content-Type": "application/json"
+          }
+          
+          # Run the Waypoint action
+          run_action_url = f"https://api.cloud.hashicorp.com/waypoint/2024-11-22/organizations/{organization_id}/projects/{project_id}/action"
+          
+          action_payload = {
+              "action_ref": {
+                  "name": f"{action_name}"
+              }
+          }
+          
+          print(f"Running Waypoint action '{action_name}' for app '{app_name}'")
+          run_response = requests.put(run_action_url, headers=headers, json=action_payload)
+          
+          if run_response.status_code != 200:
+              print(f"Error running Waypoint action: {run_response.text}")
+              exit(1)
+          
+          run_data = run_response.json()
+          job_id = run_data.get('action_run', {}).get('id')
+          
+          if not job_id:
+              print("Error: No job ID returned from action run")
+              exit(1)
+          
+          print(f"Waypoint action started. Job ID: {job_id}")
+          EOF
+          
+          # Make the script executable
+          chmod +x run_waypoint_action.py
+          
+          # Run the action
+          python run_waypoint_action.py
