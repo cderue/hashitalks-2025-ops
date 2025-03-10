@@ -23,4 +23,4 @@ jobs:
         run: hcp auth login --client-id="${{ secrets.SP_CLIENT_ID }}" --client-secret="${{ secrets.SP_CLIENT_SECRET }}"
 
       - name: Deploy with Waypoint
-        run: hcp waypoint applications create --name="${{ env.APP_NAME }}" --template-name="${{ env.TEMPLATE_NAME }} --var="app=${{ env.APP_NAME }}" --var="github_repository_url=${{ env.GITHUB_REPOSITORY_URL }}" --var="github_repository_branch=${{ env.GITHUB_REPOSITORY_BRANCH }}"
+        run: hcp waypoint applications update --name="${{ env.APP_NAME }}" --action-config-name="Merge Branch"
