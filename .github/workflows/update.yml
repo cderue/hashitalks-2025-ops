@@ -1,31 +1,8 @@
 name: Run Waypoint Action
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
-    inputs:
-      project_id:
-        description: 'HCP Waypoint Project ID'
-        required: true
-        default: ''
-      app_name:
-        description: 'Application Name'
-        required: true
-        default: ''
-      workspace_name:
-        description: 'Workspace Name'
-        required: true
-        default: 'default'
-      action_name:
-        description: 'Action Name to Run'
-        required: true
-        default: ''
-      action_params:
-        description: 'Action Parameters (JSON)'
-        required: false
-        default: '{}'
-
+    
 jobs:
   run-waypoint-action:
     runs-on: ubuntu-latest
@@ -36,13 +13,11 @@ jobs:
       - name: Run Waypoint Action
         id: run-waypoint-action
         env:
-          HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
-          HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
-          PROJECT_ID: ${{ github.event.inputs.project_id || secrets.HCP_WAYPOINT_PROJECT_ID }}
-          APP_NAME: ${{ github.event.inputs.app_name }}
-          WORKSPACE_NAME: ${{ github.event.inputs.workspace_name }}
-          ACTION_NAME: ${{ github.event.inputs.action_name }}
-          ACTION_PARAMS: ${{ github.event.inputs.action_params }}
+          HCP_CLIENT_ID: ${{ secrets.SP_CLIENT_ID }}
+          HCP_CLIENT_SECRET: ${{ secrets.SP_CLIENT_SECRET }}
+          PROJECT_ID: ${{ secrets.HCP_WAYPOINT_PROJECT_ID }}
+          APP_NAME: ${{ env.HCP_WAYPOINT_APP_NAME }}
+          ACTION_NAME: ${{ env.HCP_WAYPOINT_ACTION_NAME }}
         run: |
           # Install dependencies
           pip install requests
@@ -66,7 +41,7 @@ jobs:
           project_id = os.environ.get('PROJECT_ID')
           app_name = os.environ.get('APP_NAME')
           action_name = os.environ.get('ACTION_NAME')
-          action_params_str = os.environ.get('ACTION_PARAMS', '{}')
+          #action_params_str = os.environ.get('ACTION_PARAMS', '{}')
           
           # Parse action parameters
           try:
