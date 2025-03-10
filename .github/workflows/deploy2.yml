@@ -24,7 +24,7 @@ jobs:
           pip install requests
 
           # Create the Python script to run the Waypoint action
-          cat > run_waypoint_action.py << 'EOF'
+          cat > run_waypoint_application.py << 'EOF'
           #!/usr/bin/env python3
           import os
           import json
@@ -83,37 +83,37 @@ jobs:
                   "variable_type": "string"
                 },
                 {
-                  "name": "repository_url",
-                  "value": "",
+                  "name": "github_repository_url",
+                  "value": "${{ github.server_url }}/${{ github.repository }}",
                   "variable_type: "string"
                 },
                 {
-                  "name": "repository_branch",
+                  "name": "github_repository_branch",
                   "value": "main",
                   "variable_type: "string"
                 }
               ]
           }
           
-          print(f"Running Waypoint action '{action_name}' for app '{app_name}'")
-          run_response = requests.put(run_action_url, headers=headers, json=action_payload)
+          print(f"Creating Waypoint application '{app_name}'")
+          application_response = requests.post(run_action_url, headers=headers, json=action_payload)
           
-          if run_response.status_code != 200:
-              print(f"Error running Waypoint action: {run_response.text}")
+          if application_response.status_code != 200:
+              print(f"Error creating Waypoint application: {application_response.text}")
               exit(1)
           
-          run_data = run_response.json()
-          job_id = run_data.get('action_run', {}).get('id')
+          application_data = application_response.json()
+          application_id = application_data.get('application', {}).get('id')
           
-          if not job_id:
-              print("Error: No job ID returned from action run")
+          if not application_id:
+              print("Error: No application ID returned from application creation")
               exit(1)
           
-          print(f"Waypoint action started. Job ID: {job_id}")
+          print(f"Waypoint application created. Application ID: {application_id}")
           EOF
           
           # Make the script executable
-          chmod +x run_waypoint_action.py
+          chmod +x run_waypoint_application.py
           
           # Run the action
-          python run_waypoint_action.py
+          python run_waypoint_application.py
