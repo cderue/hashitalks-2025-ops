@@ -23,4 +23,4 @@ jobs:
         run: hcp auth login --client-id="${{ secrets.SP_CLIENT_ID }}" --client-secret="${{ secrets.SP_CLIENT_SECRET }}"
 
       - name: Deploy with Waypoint
-        run: hcp waypoint applications update --name="human-talks-demo" --action-config-name="Merge Branch" --project="cderue-project"
+        run: hcp waypoint applications update --name="human-talks-demo" --action-config-name="Merge Branch" --project="3e947867-82a7-4183-9280-de2051c8596b"
