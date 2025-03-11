@@ -85,7 +85,7 @@ jobs:
                 },
                 {
                   "name": "repository_url",
-                  "value": "${{ github.server_url }}/${{ github.repository }}",
+                  "value": "https://github.com/cderue/hashitalks-2025",
                   "variable_type": "string"
                 },
                 {
